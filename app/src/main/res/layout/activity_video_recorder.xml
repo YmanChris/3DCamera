@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:van="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.example.yman.recordvideo.widget.CameraSurfaceView
+        android:id="@+id/CaptureView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="按下拍摄按钮"
+        android:textColor="#ff0000"
+        android:layout_marginTop="30dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp">
+        <RadioButton
+            android:id="@+id/light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:button="@null"
+            android:layout_toLeftOf="@+id/circleProgressButton"/>
+        <RadioButton
+            android:id="@+id/exchange_angel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:button="@null"
+            android:layout_toRightOf="@+id/circleProgressButton"/>
+        <com.example.yman.recordvideo.widget.circleProgressBar.CircleProgressButton
+            android:id="@+id/circleProgressButton"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            van:circleColor="@android:color/holo_blue_light"
+            van:progressColor="@android:color/holo_orange_dark"
+            van:progressWidth="5dp"
+            van:textColor="@android:color/black"
+            van:textSize="12sp"/>
+    </RelativeLayout>
+
+</RelativeLayout>

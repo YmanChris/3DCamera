@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">3D拍摄</string>
+    <string name="text_hint">请输入商品sku</string>
+</resources>
