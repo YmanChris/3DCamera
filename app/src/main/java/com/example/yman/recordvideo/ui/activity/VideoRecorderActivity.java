@@ -18,17 +18,20 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.example.yman.recordvideo.R;
+import com.example.yman.recordvideo.model.Constants;
+import com.example.yman.recordvideo.util.FileUtils;
 import com.example.yman.recordvideo.widget.CameraSurfaceView;
 import com.example.yman.recordvideo.widget.circleProgressBar.CircleProgressButton;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by Yxy on 2017/1/24.
+ * Created by Yinxiangyang on 2017/1/24.
  */
 
 public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder.Callback,View.OnClickListener,Camera.PreviewCallback{
@@ -43,9 +46,11 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
     private String sku;
     private boolean isRecording = false;
 
-    private int screenWidth;
-    private int screenHeight;
     private boolean isPreview = false;
+
+    private float screenProp;
+    private int width;
+    private int height;
 
     private Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
 
@@ -73,24 +78,12 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
         surfaceView = (CameraSurfaceView) findViewById(R.id.CaptureView);
         surfaceView.setOnClickListener(this);
 
-        //获取屏幕的宽和高
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        screenWidth = dm.widthPixels;
-        screenHeight = dm.heightPixels;
-
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     }
 
-    public void initData(){
-
-    }
-    public void serListener(){
-
-    }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -147,10 +140,36 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
         if(camera == null)
             camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);    // 从照相机采集视频
         camera.setDisplayOrientation(90);   //解决画面角度旋转90度情况
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        parameters.setRecordingHint(true);
-        camera.setParameters(parameters);
+        Camera.Parameters mParams = camera.getParameters();
+        List<Camera.Size> sizeList = mParams.getSupportedPreviewSizes();
+        List<Camera.Size> previewSizes = mParams.getSupportedPreviewSizes();
+        Iterator<Camera.Size> itor = sizeList.iterator();
+        Iterator<Camera.Size> previewItor = previewSizes.iterator();
+        while (previewItor.hasNext()) {
+            Camera.Size cur = previewItor.next();
+            Log.i(TAG, "PreviewSize    width = " + cur.width + " height = " + cur.height);
+        }
+        float disparity = 1000;
+        while (itor.hasNext()) {
+            Camera.Size cur = itor.next();
+            float prop = (float) cur.height / (float) cur.width;
+            if (Math.abs(screenProp - prop) < disparity) {
+                disparity = Math.abs(screenProp - prop);
+                width = cur.width;
+                height = cur.height;
+            }
+            Log.i(TAG, "width = " + cur.width + " height = " + cur.height);
+
+        }
+        Log.i(TAG, "Mmkesure width = " + width + " height = " + height);
+        mParams.setPreviewSize(width, height);
+        mParams.setPictureSize(width, height);
+        mParams.setRecordingHint(true);
+        mParams.set("orientation", "portrait");
+        camera.setDisplayOrientation(90);
+        mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        mParams.setRecordingHint(true);
+        camera.setParameters(mParams);
         camera.unlock();
         mediarecorder.setCamera(camera);
         mediarecorder.setOrientationHint(90);   //视频旋转90度
@@ -158,8 +177,13 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
         mediarecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediarecorder.setVideoEncodingBitRate(5 * 1024 * 1024);
         mediarecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-        File videoFile = new File(Environment.getExternalStorageDirectory()+"/com.jd.record",
+        File videoFile = new File(FileUtils.getStoragePath(),
                 sku + ".mpg");
+        if(videoFile.exists()){
+            Toast.makeText(this,"该sku已存在，请重新输入",Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         mediarecorder.setPreviewDisplay(surfaceView.getHolder()
                 .getSurface());
         mediarecorder.setOutputFile(videoFile.getAbsolutePath());
@@ -168,9 +192,10 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
         } catch (IOException e) {
             e.printStackTrace();
         }
+        FileUtils.createNewFile(sku);
         mediarecorder.start();
         isRecording = true;
-        timer.schedule(task,11 * 1000);
+        timer.schedule(task, Constants.RECORDTIME * 1000);
     }
     public void startTimeVideoRecord(){
 
@@ -187,12 +212,6 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
             mediarecorder.release();
             mediarecorder = null;
         }
-    }
-    public void startVideoPlay(){
-
-    }
-    public void setUiDisplayAfterVideoRecorderFinish(){
-
     }
 
     @Override
@@ -248,7 +267,7 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
                 //如果设置的图像尺寸，摄像头不支持，则会出错，
                 //因此在真机上测试前，先要确定摄像头支持哪些尺寸
                 parameters.setPreviewSize(p.x, p.y);  //设置预览图像的尺寸大小
-                parameters.setPreviewFpsRange(10, 20);                 //设置每秒显示10-20帧
+                parameters.setPreviewFpsRange(20, 30);                 //设置每秒显示10-20帧
                 // 横竖屏镜头自动调整
                 if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE){
                     parameters.set("orientation", "portrait");

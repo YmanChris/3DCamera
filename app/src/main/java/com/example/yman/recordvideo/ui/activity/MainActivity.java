@@ -14,10 +14,15 @@ import android.widget.Toast;
 
 import com.example.yman.recordvideo.R;
 import com.example.yman.recordvideo.model.Goods;
+import com.example.yman.recordvideo.util.FileUtils;
 import com.example.yman.recordvideo.util.StringUtils;
 
+import java.io.File;
 
 
+/**
+ * Created by yinxiangyang on 2017/1/24.
+ */
 
 public class MainActivity extends BaseActivity implements View.OnClickListener{
 
@@ -62,10 +67,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     break;
                 }
                 else {
-                    Goods goods = new Goods(skuEdit.getText().toString());
-                    intent = new Intent(MainActivity.this, VideoRecorderActivity.class);
-                    intent.putExtra("sku",goods.getSku());
-                    startActivity(intent);
+                    File videoFile = new File(FileUtils.getStoragePath(),
+                            skuEdit.getText().toString() + ".mpg");
+                    if(videoFile.exists())
+                        Toast.makeText(this,"该sku已存在，请重新输入",Toast.LENGTH_SHORT).show();
+                    else {
+                        Goods goods = new Goods(skuEdit.getText().toString());
+                        intent = new Intent(MainActivity.this, VideoRecorderActivity.class);
+                        intent.putExtra("sku", goods.getSku());
+                        startActivity(intent);
+                        skuEdit.setText("");
+                    }
                 }
                 break;
             default:

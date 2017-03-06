@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Think on 2017/1/24.
+ * Created by yinxiangyang on 2017/1/24.
  */
 
 public class FileUtils {
@@ -24,6 +24,10 @@ public class FileUtils {
     private static   String storagePath = "";
     private static final String DST_FOLDER_NAME = "com.jd.record";
 
+    /**
+     * 初始化文件路径
+     * @return
+     */
     public static String initPath(){
         if(storagePath.equals("")){
             storagePath = parentPath.getAbsolutePath()+"/" + DST_FOLDER_NAME;
@@ -35,6 +39,10 @@ public class FileUtils {
         return storagePath;
     }
 
+    /**
+     * 获取视频列表
+     * @return
+     */
     public static List<VideoInfo> getVideoList(){
 
         List<VideoInfo> videoInfos = new ArrayList<>();
@@ -45,64 +53,54 @@ public class FileUtils {
         }
         File f = new File(storagePath);
         File[] lists = f.listFiles();
-        for(File file:lists){
-            String filename = file.getName();
-            if(filename.trim().toLowerCase().endsWith("mpg")){
-                media.setDataSource(storagePath +"/"+ filename);
-                Bitmap bitmap = media.getFrameAtTime();
-                videoInfos.add(new VideoInfo(filename,bitmap));
+        if(lists != null && lists.length > 0) {
+            for (File file : lists) {
+                String filename = file.getName();
+                if (filename.trim().toLowerCase().endsWith(".mpg")) {
+                    media.setDataSource(storagePath + "/" + filename);
+                    Bitmap bitmap = media.getFrameAtTime();
+                    filename = filename.split(".mpg")[0];
+                    videoInfos.add(new VideoInfo(filename, bitmap));
+                }
             }
         }
         return videoInfos;
     }
 
-    public static void getBitmapsFromVideo(String name , int level){
-
-
+    /**
+     * 创建sku文件
+     * @param sku
+     */
+    public static void createNewFile(String sku){
         if(storagePath.equals("")){
             storagePath = parentPath.getAbsolutePath()+"/" + DST_FOLDER_NAME;
         }
-        /*MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(storagePath+"/"+name);
-        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        int seconds = Integer.parseInt(time) / 1000;
-        Log.e("videoSecond",seconds+"!!");
-        for(int i = 0 ; i < seconds ; i++){
-            Bitmap bitmap = retriever.getFrameAtTime(i * 1000 * 1000 , MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-            saveBitmap(bitmap,storagePath + "/image" + i + ".jpg");
-        }*/
-
+        File file = new File(storagePath+ "/" + sku);
+        if(!file.exists()){
+            file.mkdirs();
+        }
     }
 
-    public static void saveBitmap(Bitmap bitmap , String path){
-        File file = new File(path);
+    public static boolean checkImageExists(String sku){
+        File file = new File(getStoragePath() + "/" + sku);
         if(file.exists()){
-            file.delete();
-        }
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG,100,out);
-            Log.e("saveBitmap","complete---");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }finally {
-            if(out != null){
-                try {
-                    out.flush();
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+            if(file.isDirectory()){
+                if(file.listFiles() != null && file.listFiles().length > 0)
+                    return true;
+                else
+                    return false;
             }
+            else return false;
         }
-
+        else
+            return false;
     }
 
+    /**
+     * 获取路径
+     * @return
+     */
+    public static String getStoragePath() {
+        return storagePath;
+    }
 }

@@ -3,6 +3,7 @@ package com.example.yman.recordvideo;
 import android.app.Application;
 
 import com.example.yman.recordvideo.util.FileUtils;
+import com.example.yman.recordvideo.util.LogUtils;
 
 /**
  * Created by Think on 2017/1/24.
@@ -17,6 +18,7 @@ public class YYApplication extends Application{
         super.onCreate();
         setInstance(this);
         FileUtils.initPath();
+        LogUtils.setDebug(true);
     }
     public void setInstance(YYApplication application){
         instance = application;

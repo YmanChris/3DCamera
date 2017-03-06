@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">3D拍摄</string>
     <string name="text_hint">请输入商品sku</string>
+    <string name="no_video_tips">您还没有录制效果，去录制一个吧~</string>
 </resources>

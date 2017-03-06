@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.yman.recordvideo.R;
@@ -19,6 +20,7 @@ import com.example.yman.recordvideo.model.SpeedConstants;
 import com.example.yman.recordvideo.model.VideoInfo;
 import com.example.yman.recordvideo.ui.adapter.VideoAdapter;
 import com.example.yman.recordvideo.util.FileUtils;
+import com.example.yman.recordvideo.util.LogUtils;
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
@@ -34,7 +36,7 @@ import butterknife.ButterKnife;
 import dagger.ObjectGraph;
 
 /**
- * Created by Think on 2017/2/1.
+ * Created by yinxiangyang on 2017/2/1.
  */
 
 public class VideoListsActivity extends BaseActivity{
@@ -44,9 +46,12 @@ public class VideoListsActivity extends BaseActivity{
     @Inject
     FFmpeg ffmpeg;
 
+    private TextView tips;
     private GridView listView;
     private VideoAdapter adapter;
     private List<VideoInfo> videoInfos = new ArrayList<>();
+
+    private int clickPosition = 0;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,29 +67,38 @@ public class VideoListsActivity extends BaseActivity{
 
     }
     public void init(){
-        Log.e(TAG,"init");
         videoInfos = FileUtils.getVideoList();
-        Log.e(TAG,videoInfos.get(0).getName()+"..");
-      //  adapter.notifyDataSetChanged();
     }
 
     public void initView(){
+        tips = (TextView) findViewById(R.id.no_video_tips);
+        if (videoInfos == null || videoInfos.size() == 0){
+            tips.setText(getString(R.string.no_video_tips));
+        }
+        else
+            tips.setVisibility(View.GONE);
         listView = (GridView) findViewById(R.id.list);
         adapter = new VideoAdapter(this,videoInfos);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-               // FileUtils.getBitmapsFromVideo(videoInfos.get(i).getName(), SpeedConstants.LOW);
-                /*String cmd = "-y -i "+ Environment.getExternalStorageDirectory()+"/com.jd.record/"+videoInfos.get(i).getName()+" -r 5 -q:v 2 "+Environment.getExternalStorageDirectory()+"/com.jd.record/image%d.jpg";
-                String[] command = cmd.split(" ");
-                if (command.length != 0) {
-                    execFFmpegBinary(command);
-                } else {
-                    Toast.makeText(VideoListsActivity.this, "You cannot execute empty command", Toast.LENGTH_LONG).show();
-                }*/
-                Intent intent = new Intent(VideoListsActivity.this,PicturePlayActivity.class);
-                startActivity(intent);
+                boolean isExists = FileUtils.checkImageExists(videoInfos.get(i).getName());
+                clickPosition = i;
+                if(!isExists){
+                    String cmd = "-y -i "+ Environment.getExternalStorageDirectory()+"/com.jd.record/"+videoInfos.get(i).getName()+".mpg"+" -r 30 -q:v 2 "+Environment.getExternalStorageDirectory()+"/com.jd.record/"+videoInfos.get(i).getName()+"/image%d.jpg";
+                    String[] command = cmd.split(" ");
+                    if (command.length != 0) {
+                        execFFmpegBinary(command);
+                    } else {
+                        Toast.makeText(VideoListsActivity.this, "You cannot execute empty command", Toast.LENGTH_LONG).show();
+                    }
+                }
+                else {
+                    Intent intent = new Intent(VideoListsActivity.this, PicturePlayActivity.class);
+                    intent.putExtra("sku", videoInfos.get(i).getName());
+                    startActivity(intent);
+                }
             }
         });
     }
@@ -127,6 +141,9 @@ public class VideoListsActivity extends BaseActivity{
                 @Override
                 public void onSuccess(String s) {
                     Toast.makeText(VideoListsActivity.this,"Success",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(VideoListsActivity.this, PicturePlayActivity.class);
+                    intent.putExtra("sku", videoInfos.get(clickPosition).getName());
+                    startActivity(intent);
                 }
 
                 @Override
