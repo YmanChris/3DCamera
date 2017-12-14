@@ -162,19 +162,19 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
 
         }
         Log.i(TAG, "Mmkesure width = " + width + " height = " + height);
-        mParams.setPreviewSize(width, height);
-        mParams.setPictureSize(width, height);
-        mParams.setRecordingHint(true);
-        mParams.set("orientation", "portrait");
+       // mParams.setPreviewSize(width, height);
+        //mParams.setPictureSize(width, height);
+        //mParams.setRecordingHint(true);
+       // mParams.set("orientation", "portrait");
         camera.setDisplayOrientation(90);
         mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        mParams.setRecordingHint(true);
+        //mParams.setRecordingHint(true);
         camera.setParameters(mParams);
         camera.unlock();
         mediarecorder.setCamera(camera);
         mediarecorder.setOrientationHint(90);   //视频旋转90度
         mediarecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediarecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediarecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mediarecorder.setVideoEncodingBitRate(5 * 1024 * 1024);
         mediarecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
         File videoFile = new File(FileUtils.getStoragePath(),
@@ -266,16 +266,16 @@ public class VideoRecorderActivity extends BaseActivity implements SurfaceHolder
                 //每台手机的摄像头所支持的图像预览或拍摄尺寸不尽相同，
                 //如果设置的图像尺寸，摄像头不支持，则会出错，
                 //因此在真机上测试前，先要确定摄像头支持哪些尺寸
-                parameters.setPreviewSize(p.x, p.y);  //设置预览图像的尺寸大小
-                parameters.setPreviewFpsRange(20, 30);                 //设置每秒显示10-20帧
+               // parameters.setPreviewSize(p.x, p.y);  //设置预览图像的尺寸大小
+                //parameters.setPreviewFpsRange(20, 30);                 //设置每秒显示10-20帧
                 // 横竖屏镜头自动调整
                 if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE){
-                    parameters.set("orientation", "portrait");
-                    parameters.set("rotation", 90); // 镜头角度转90度（默认摄像头是横拍）
+                   // parameters.set("orientation", "portrait");
+                   // parameters.set("rotation", 90); // 镜头角度转90度（默认摄像头是横拍）
                     camera.setDisplayOrientation(90); // 在2.2以上可以使用
                 } else{
                     // 如果是横屏
-                    parameters.set("orientation", "landscape");
+                  //  parameters.set("orientation", "landscape");
                     camera.setDisplayOrientation(0); // 在2.2以上可以使用
                 }
                 camera.setParameters(parameters);

@@ -56,6 +56,7 @@ public class FileUtils {
         if(lists != null && lists.length > 0) {
             for (File file : lists) {
                 String filename = file.getName();
+                Log.i(TAG,filename);
                 if (filename.trim().toLowerCase().endsWith(".mpg")) {
                     media.setDataSource(storagePath + "/" + filename);
                     Bitmap bitmap = media.getFrameAtTime();
